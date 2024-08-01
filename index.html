@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Rock Paper Scissors DApp</title>
+    <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
+    <style>
+        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
+        button { margin: 5px; padding: 10px; }
+    </style>
+</head>
+<body>
+    <h1>Rock Paper Scissors DApp</h1>
+    <div id="connection-status">Not connected to MetaMask</div>
+    <button id="connect-button">Connect to MetaMask</button>
+    <div>
+        <h2>Play Game</h2>
+        <input type="number" id="bet-amount" placeholder="Bet amount in ETH" step="0.01" min="0" max="1">
+        <button id="rock-button">Rock</button>
+        <button id="paper-button">Paper</button>
+        <button id="scissors-button">Scissors</button>
+    </div>
+    <div id="game-result"></div>
+
+    <script>
+        const contractAddress = "YOUR_CONTRACT_ADDRESS_HERE";
+        const contractABI = [
+            "function playGame(uint8 _move) public payable",
+            "event GamePlayed(address player, uint8 playerMove, uint8 opponentMove, uint8 outcome, uint256 bet, uint256 winnings)"
+        ];
+
+        let signer, contract;
+
+        async function connectWallet() {
+            if (typeof window.ethereum !== 'undefined') {
+                try {
+                    await ethereum.request({ method: 'eth_requestAccounts' });
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
+                    signer = provider.getSigner();
+                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    document.getElementById('connection-status').textContent = 'Connected to MetaMask';
+                    document.getElementById('connect-button').style.display = 'none';
+                } catch (error) {
+                    console.error("User denied account access");
+                }
+            } else {
+                console.log('Please install MetaMask!');
+            }
+        }
+
+        async function playGame(move) {
+            if (!contract) {
+                alert("Please connect to MetaMask first");
+                return;
+            }
+            
+            const betAmount = document.getElementById('bet-amount').value;
+            if (betAmount < 0 || betAmount > 1) {
+                alert("Bet amount must be between 0 and 1 ETH");
+                return;
+            }
+
+            try {
+                const tx = await contract.playGame(move, {
+                    value: ethers.utils.parseEther(betAmount)
+                });
+                const receipt = await tx.wait();
+                
+                for (const event of receipt.events) {
+                    if (event.event === 'GamePlayed') {
+                        const [player, playerMove, opponentMove, outcome, bet, winnings] = event.args;
+                        const moves = ['Rock', 'Paper', 'Scissors'];
+                        const outcomes = ['Tie', 'Win', 'Lose'];
+                        document.getElementById('game-result').innerHTML = `
+                            Player Move: ${moves[playerMove]}<br>
+                            Opponent Move: ${moves[opponentMove]}<br>
+                            Outcome: ${outcomes[outcome]}<br>
+                            Bet: ${ethers.utils.formatEther(bet)} ETH<br>
+                            Winnings: ${ethers.utils.formatEther(winnings)} ETH
+                        `;
+                    }
+                }
+            } catch (error) {
+                console.error("Error playing game:", error);
+                alert("Error playing game. Check console for details.");
+            }
+        }
+
+        document.getElementById('connect-button').addEventListener('click', connectWallet);
+        document.getElementById('rock-button').addEventListener('click', () => playGame(0));
+        document.getElementById('paper-button').addEventListener('click', () => playGame(1));
+        document.getElementById('scissors-button').addEventListener('click', () => playGame(2));
+    </script>
+</body>
+</html>
