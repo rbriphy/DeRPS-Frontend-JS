@@ -37,18 +37,18 @@
             if (typeof window.ethereum !== 'undefined') {
                 try {
                     await ethereum.request({ method: 'eth_requestAccounts' });
-                    const provider = new ethers.providers.JsonRpcProvider('https://lively-base-0c07.rbriphy.workers.dev/');
+                    const provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
                     contract = new ethers.Contract(contractAddress, contractABI, signer);
                     document.getElementById('connection-status').textContent = 'Connected to MetaMask';
                     document.getElementById('connect-button').style.display = 'none';
-                    } 
+                } 
                 catch (error) {
-                    console.error("User denied account access");
+                console.error("User denied account access", error);
                 }
             } 
             else {
-                console.log('Please install MetaMask!');
+            console.log('Please install MetaMask!');
             }
         }
 
