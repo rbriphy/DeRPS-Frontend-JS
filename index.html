@@ -3,205 +3,104 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Rock Paper Scissors DApp</title>
+    <title>DeRPS - A Decentralized Rock Paper Scissors Game</title>
     <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
     <style>
-        body { font-family: Arial, sans-serif; max-width: 800px; margin: 0 auto; padding: 20px; }
-        button { margin: 5px; padding: 10px; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            background-color: #f0f0f0;
+            color: #333;
+        }
+        h1 {
+            color: #2c3e50;
+            text-align: center;
+            margin-bottom: 30px;
+        }
+        #connection-status {
+            text-align: center;
+            margin-bottom: 20px;
+            font-weight: bold;
+        }
+        button {
+            margin: 5px;
+            padding: 10px 20px;
+            font-size: 16px;
+            cursor: pointer;
+            background-color: #3498db;
+            color: white;
+            border: none;
+            border-radius: 5px;
+            transition: background-color 0.3s;
+        }
+        button:hover {
+            background-color: #2980b9;
+        }
+        #connect-button {
+            display: block;
+            margin: 20px auto;
+            background-color: #2ecc71;
+        }
+        #connect-button:hover {
+            background-color: #27ae60;
+        }
+        .game-section {
+            background-color: white;
+            padding: 20px;
+            border-radius: 10px;
+            box-shadow: 0 0 10px rgba(0,0,0,0.1);
+            margin-top: 20px;
+        }
+        h2 {
+            color: #2c3e50;
+            margin-top: 0;
+        }
+        #bet-amount {
+            width: 100%;
+            padding: 10px;
+            margin-bottom: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+        }
+        .move-buttons {
+            display: flex;
+            justify-content: space-between;
+        }
+        #game-result {
+            margin-top: 20px;
+            padding: 15px;
+            background-color: #ecf0f1;
+            border-radius: 5px;
+            font-size: 14px;
+            line-height: 1.6;
+        }
     </style>
 </head>
 <body>
-    <h1>Rock Paper Scissors DApp</h1>
+    <h1>DeRPS - A Decentralized Rock Paper Scissors Game</h1>
     <div id="connection-status">Not connected to MetaMask</div>
     <button id="connect-button">Connect to MetaMask</button>
-    <div>
+    
+    <div class="game-section">
         <h2>Play Game</h2>
-        <input type="number" id="bet-amount" placeholder="Bet amount in ETH" step="0.01" min="0" max="1">
-        <button id="rock-button">Rock</button>
-        <button id="paper-button">Paper</button>
-        <button id="scissors-button">Scissors</button>
+        <input type="number" id="bet-amount" placeholder="Bet amount in ROSE" step="0.01" min="0" max="1">
+        <div class="move-buttons">
+            <button id="rock-button">🪨 Rock</button>
+            <button id="paper-button">📄 Paper</button>
+            <button id="scissors-button">✂️ Scissors</button>
+        </div>
     </div>
+    
     <div id="game-result"></div>
 
+    <script src="abi.js"></script>
+
     <script type="module">
-        const contractAddress = "0x2cee812ad2159Eb22D8403ccF494216BCC9cbDD4";
-        const contractABI = [
-            {
-                "type": "constructor",
-                "inputs": [],
-                "stateMutability": "payable"
-            },
-            {
-                "type": "receive",
-                "stateMutability": "payable"
-            },
-            {
-                "type": "function",
-                "name": "playGame",
-                "inputs": [
-                    {
-                        "name": "_move",
-                        "type": "uint8",
-                        "internalType": "uint8"
-                    }
-                ],
-                "outputs": [],
-                "stateMutability": "payable"
-            },
-            {
-                "type": "event",
-                "name": "GamePlayed",
-                "inputs": [
-                    {
-                        "name": "player",
-                        "type": "address",
-                        "indexed": false,
-                        "internalType": "address"
-                    },
-                    {
-                        "name": "playerMove",
-                        "type": "uint8",
-                        "indexed": false,
-                        "internalType": "uint8"
-                    },
-                    {
-                        "name": "opponentMove",
-                        "type": "uint8",
-                        "indexed": false,
-                        "internalType": "uint8"
-                    },
-                    {
-                        "name": "outcome",
-                        "type": "uint8",
-                        "indexed": false,
-                        "internalType": "uint8"
-                    },
-                    {
-                        "name": "bet",
-                        "type": "uint256",
-                        "indexed": false,
-                        "internalType": "uint256"
-                    },
-                    {
-                        "name": "winnings",
-                        "type": "uint256",
-                        "indexed": false,
-                        "internalType": "uint256"
-                    },
-                    {
-                      "type": "error",
-                      "name": "OwnableInvalidOwner",
-                      "inputs": [{"name": "owner", "type": "address", "internalType": "address"}]
-                    },
-                    {
-                      "type": "error",
-                      "name": "OwnableUnauthorizedAccount",
-                      "inputs": [{"name": "account", "type": "address", "internalType": "address"}]
-                    },
-                    {
-                      "type": "error",
-                      "name": "ReentrancyGuardReentrantCall",
-                      "inputs": []
-                    },
-                    {
-  "type": "function",
-  "name": "FEE_PERCENTAGE",
-  "inputs": [],
-  "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
-  "stateMutability": "view"
-},
-{
-  "type": "function",
-  "name": "MAX_BET",
-  "inputs": [],
-  "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
-  "stateMutability": "view"
-},
-{
-  "type": "function",
-  "name": "getAdminPoolBalance",
-  "inputs": [],
-  "outputs": [{"name": "", "type": "uint256", "internalType": "uint256"}],
-  "stateMutability": "view"
-},
-{
-  "type": "function",
-  "name": "owner",
-  "inputs": [],
-  "outputs": [{"name": "", "type": "address", "internalType": "address"}],
-  "stateMutability": "view"
-},
-{
-  "type": "function",
-  "name": "renounceOwnership",
-  "inputs": [],
-  "outputs": [],
-  "stateMutability": "nonpayable"
-},
-{
-  "type": "function",
-  "name": "testGenerateRandom",
-  "inputs": [],
-  "outputs": [{"name": "randomBig", "type": "uint256", "internalType": "uint256"}],
-  "stateMutability": "view"
-},
-{
-  "type": "function",
-  "name": "testRandomModulo",
-  "inputs": [],
-  "outputs": [{"name": "randomMod", "type": "uint256", "internalType": "uint256"}],
-  "stateMutability": "view"
-},
-{
-  "type": "function",
-  "name": "transferOwnership",
-  "inputs": [{"name": "newOwner", "type": "address", "internalType": "address"}],
-  "outputs": [],
-  "stateMutability": "nonpayable"
-},
-{
-  "type": "function",
-  "name": "withdrawFunds",
-  "inputs": [{"name": "amount", "type": "uint256", "internalType": "uint256"}],
-  "outputs": [],
-  "stateMutability": "nonpayable"
-},
-{
-  "type": "event",
-  "name": "BetPlaced",
-  "inputs": [
-    {"name": "player", "type": "address", "indexed": false, "internalType": "address"},
-    {"name": "bet", "type": "uint256", "indexed": false, "internalType": "uint256"}
-  ],
-  "anonymous": false
-},
-{
-  "type": "event",
-  "name": "OwnershipTransferred",
-  "inputs": [
-    {"name": "previousOwner", "type": "address", "indexed": true, "internalType": "address"},
-    {"name": "newOwner", "type": "address", "indexed": true, "internalType": "address"}
-  ],
-  "anonymous": false
-},
-{
-  "type": "event",
-  "name": "Withdrawal",
-  "inputs": [
-    {"name": "player", "type": "address", "indexed": false, "internalType": "address"},
-    {"name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256"}
-  ],
-  "anonymous": false
-}
-
-
-
-
-                ],
-                "anonymous": false
-            }
-        ];
-
+        const CONTRACT_ADDRESS = "0x2cee812ad2159Eb22D8403ccF494216BCC9cbDD4";
+        const MAX_BET = 1;
+        const GAS_LIMIT = 300000
         let signer, contract;
 
         async function connectWallet() {
@@ -210,7 +109,7 @@
                     await ethereum.request({ method: 'eth_requestAccounts' });
                     const provider = new ethers.providers.Web3Provider(window.ethereum);
                     signer = provider.getSigner();
-                    contract = new ethers.Contract(contractAddress, contractABI, signer);
+                    contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
                     document.getElementById('connection-status').textContent = 'Connected to MetaMask';
                     document.getElementById('connect-button').style.display = 'none';
                 } 
@@ -232,20 +131,30 @@
             }
             
             const betAmount = document.getElementById('bet-amount').value;
-            if (!betAmount || isNaN(betAmount) || betAmount < 0 || betAmount > 1) {
-                alert("Bet amount must be a number between 0 and 1 ETH");
+            if (!betAmount || isNaN(betAmount) || betAmount < 0 || betAmount > MAX_BET) {
+                alert(`Bet amount must be a number between 0 and ${MAX_BET} ROSE`);
                 return;
             }
 
             try {
+                // Update game result to show transaction is in progress
+                document.getElementById('game-result').innerHTML = "Transaction in progress...";
+
                 const tx = await contract.playGame(move, {
                     value: ethers.utils.parseEther(betAmount),
-                    gasLimit: 300000
+                    gasLimit: GAS_LIMIT
                 });
+
+                // Update game result to show transaction is pending confirmation
+                document.getElementById('game-result').innerHTML = "Waiting for transaction confirmation...";
+
                 const receipt = await tx.wait();
                 
+                let gameResultFound = false;
+
                 for (const event of receipt.events) {
                     if (event.event === 'GamePlayed') {
+                        gameResultFound = true;
                         const [player, playerMove, opponentMove, outcome, bet, winnings] = event.args;
                         const moves = ['Rock', 'Paper', 'Scissors'];
                         const outcomes = ['Win', 'Lose', 'Tie'];
@@ -253,21 +162,29 @@
                             Player Move: ${moves[playerMove]}<br>
                             Opponent Move: ${moves[opponentMove]}<br>
                             Outcome: ${outcomes[outcome]}<br>
-                            Bet: ${ethers.utils.formatEther(bet)} ETH<br>
-                            Winnings: ${ethers.utils.formatEther(winnings)} ETH
+                            Bet: ${ethers.utils.formatEther(bet)} ROSE<br>
+                            Winnings: ${ethers.utils.formatEther(winnings)} ROSE
                         `;
+                        break;
                     }
                 }
+
+                if (!gameResultFound) {
+                    document.getElementById('game-result').innerHTML = "Game played, but no result event found. Check the transaction on the blockchain explorer for details.";
+                }
+
             } catch (error) {
                 console.error("Error playing game:", error);
-                alert("Error playing game. Check console for details.");
+                document.getElementById('game-result').innerHTML = "Error playing game. Check console for details.";
             }
         }
 
-        document.getElementById('connect-button').addEventListener('click', connectWallet);
-        document.getElementById('rock-button').addEventListener('click', () => playGame(0));
-        document.getElementById('paper-button').addEventListener('click', () => playGame(1));
-        document.getElementById('scissors-button').addEventListener('click', () => playGame(2));
+        document.addEventListener('DOMContentLoaded', () => {
+            document.getElementById('connect-button').addEventListener('click', connectWallet);
+            document.getElementById('rock-button').addEventListener('click', () => playGame(0));
+            document.getElementById('paper-button').addEventListener('click', () => playGame(1));
+            document.getElementById('scissors-button').addEventListener('click', () => playGame(2));
+        });
     </script>
 </body>
 </html>
