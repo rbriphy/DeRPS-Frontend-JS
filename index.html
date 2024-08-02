@@ -165,7 +165,35 @@
   "inputs": [{"name": "amount", "type": "uint256", "internalType": "uint256"}],
   "outputs": [],
   "stateMutability": "nonpayable"
+},
+{
+  "type": "event",
+  "name": "BetPlaced",
+  "inputs": [
+    {"name": "player", "type": "address", "indexed": false, "internalType": "address"},
+    {"name": "bet", "type": "uint256", "indexed": false, "internalType": "uint256"}
+  ],
+  "anonymous": false
+},
+{
+  "type": "event",
+  "name": "OwnershipTransferred",
+  "inputs": [
+    {"name": "previousOwner", "type": "address", "indexed": true, "internalType": "address"},
+    {"name": "newOwner", "type": "address", "indexed": true, "internalType": "address"}
+  ],
+  "anonymous": false
+},
+{
+  "type": "event",
+  "name": "Withdrawal",
+  "inputs": [
+    {"name": "player", "type": "address", "indexed": false, "internalType": "address"},
+    {"name": "amount", "type": "uint256", "indexed": false, "internalType": "uint256"}
+  ],
+  "anonymous": false
 }
+
 
 
 
