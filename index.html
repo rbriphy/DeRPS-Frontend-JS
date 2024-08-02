@@ -240,7 +240,7 @@
             try {
                 const tx = await contract.playGame(move, {
                     value: ethers.utils.parseEther(betAmount),
-                    gasLimit: 300000 // Optional: Set an appropriate gas limit
+                    gasLimit: 300000
                 });
                 const receipt = await tx.wait();
                 
@@ -248,7 +248,7 @@
                     if (event.event === 'GamePlayed') {
                         const [player, playerMove, opponentMove, outcome, bet, winnings] = event.args;
                         const moves = ['Rock', 'Paper', 'Scissors'];
-                        const outcomes = ['Tie', 'Win', 'Lose'];
+                        const outcomes = ['Win', 'Lose', 'Tie'];
                         document.getElementById('game-result').innerHTML = `
                             Player Move: ${moves[playerMove]}<br>
                             Opponent Move: ${moves[opponentMove]}<br>
