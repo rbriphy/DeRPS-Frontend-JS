@@ -10,7 +10,7 @@ node_modules/
 env.js
 
 # Config files containing sensitive data
-config.js
+
 secrets.json
 
 # Build outputs
