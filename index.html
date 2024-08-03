@@ -4,79 +4,10 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>DeRPS - A Decentralized Rock Paper Scissors Game</title>
+    <link rel="stylesheet" href="styles.css">
     <script src="https://cdn.ethers.io/lib/ethers-5.0.umd.min.js"></script>
-    <style>
-        body {
-            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-            max-width: 800px;
-            margin: 0 auto;
-            padding: 20px;
-            background-color: #f0f0f0;
-            color: #333;
-        }
-        h1 {
-            color: #2c3e50;
-            text-align: center;
-            margin-bottom: 30px;
-        }
-        #connection-status {
-            text-align: center;
-            margin-bottom: 20px;
-            font-weight: bold;
-        }
-        button {
-            margin: 5px;
-            padding: 10px 20px;
-            font-size: 16px;
-            cursor: pointer;
-            background-color: #3498db;
-            color: white;
-            border: none;
-            border-radius: 5px;
-            transition: background-color 0.3s;
-        }
-        button:hover {
-            background-color: #2980b9;
-        }
-        #connect-button {
-            display: block;
-            margin: 20px auto;
-            background-color: #2ecc71;
-        }
-        #connect-button:hover {
-            background-color: #27ae60;
-        }
-        .game-section {
-            background-color: white;
-            padding: 20px;
-            border-radius: 10px;
-            box-shadow: 0 0 10px rgba(0,0,0,0.1);
-            margin-top: 20px;
-        }
-        h2 {
-            color: #2c3e50;
-            margin-top: 0;
-        }
-        #bet-amount {
-            width: 100%;
-            padding: 10px;
-            margin-bottom: 10px;
-            border: 1px solid #ddd;
-            border-radius: 5px;
-        }
-        .move-buttons {
-            display: flex;
-            justify-content: space-between;
-        }
-        #game-result {
-            margin-top: 20px;
-            padding: 15px;
-            background-color: #ecf0f1;
-            border-radius: 5px;
-            font-size: 14px;
-            line-height: 1.6;
-        }
-    </style>
+    <script type="module" src="js/main.js"></script>
+
 </head>
 <body>
     <h1>DeRPS - A Decentralized Rock Paper Scissors Game</h1>
@@ -95,96 +26,6 @@
     
     <div id="game-result"></div>
 
-    <script src="abi.js"></script>
 
-    <script type="module">
-        const CONTRACT_ADDRESS = "0x2cee812ad2159Eb22D8403ccF494216BCC9cbDD4";
-        const MAX_BET = 1;
-        const GAS_LIMIT = 300000
-        let signer, contract;
-
-        async function connectWallet() {
-            if (typeof window.ethereum !== 'undefined') {
-                try {
-                    await ethereum.request({ method: 'eth_requestAccounts' });
-                    const provider = new ethers.providers.Web3Provider(window.ethereum);
-                    signer = provider.getSigner();
-                    contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
-                    document.getElementById('connection-status').textContent = 'Connected to MetaMask';
-                    document.getElementById('connect-button').style.display = 'none';
-                } 
-                catch (error) {
-                    console.error("User denied account access", error);
-                    alert("User denied account access");
-                }
-            } 
-            else {
-                console.log('Please install MetaMask!');
-                alert('Please install MetaMask!');
-            }
-        }
-
-        async function playGame(move) {
-            if (!contract) {
-                alert("Please connect to MetaMask first");
-                return;
-            }
-            
-            const betAmount = document.getElementById('bet-amount').value;
-            if (!betAmount || isNaN(betAmount) || betAmount < 0 || betAmount > MAX_BET) {
-                alert(`Bet amount must be a number between 0 and ${MAX_BET} ROSE`);
-                return;
-            }
-
-            try {
-                // Update game result to show transaction is in progress
-                document.getElementById('game-result').innerHTML = "Transaction in progress...";
-
-                const tx = await contract.playGame(move, {
-                    value: ethers.utils.parseEther(betAmount),
-                    gasLimit: GAS_LIMIT
-                });
-
-                // Update game result to show transaction is pending confirmation
-                document.getElementById('game-result').innerHTML = "Waiting for transaction confirmation...";
-
-                const receipt = await tx.wait();
-                
-                let gameResultFound = false;
-
-                for (const event of receipt.events) {
-                    if (event.event === 'GamePlayed') {
-                        gameResultFound = true;
-                        const [player, playerMove, opponentMove, outcome, bet, winnings] = event.args;
-                        const moves = ['Rock', 'Paper', 'Scissors'];
-                        const outcomes = ['Win', 'Lose', 'Tie'];
-                        document.getElementById('game-result').innerHTML = `
-                            Player Move: ${moves[playerMove]}<br>
-                            Opponent Move: ${moves[opponentMove]}<br>
-                            Outcome: ${outcomes[outcome]}<br>
-                            Bet: ${ethers.utils.formatEther(bet)} ROSE<br>
-                            Winnings: ${ethers.utils.formatEther(winnings)} ROSE
-                        `;
-                        break;
-                    }
-                }
-
-                if (!gameResultFound) {
-                    document.getElementById('game-result').innerHTML = "Game played, but no result event found. Check the transaction on the blockchain explorer for details.";
-                }
-
-            } catch (error) {
-                console.error("Error playing game:", error);
-                document.getElementById('game-result').innerHTML = "Error playing game. Check console for details.";
-            }
-        }
-
-        document.addEventListener('DOMContentLoaded', () => {
-            document.getElementById('connect-button').addEventListener('click', connectWallet);
-            document.getElementById('rock-button').addEventListener('click', () => playGame(0));
-            document.getElementById('paper-button').addEventListener('click', () => playGame(1));
-            document.getElementById('scissors-button').addEventListener('click', () => playGame(2));
-        });
-    </script>
 </body>
 </html>
