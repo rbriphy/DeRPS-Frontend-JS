@@ -31,8 +31,8 @@ export async function ensureCorrectNetwork() {
                                 symbol: "ROSE",
                                 decimals: 18
                             },
-                            rpcUrls: ["https://testnet.sapphire.oasis.dev"],
-                            blockExplorerUrls: ["https://testnet.explorer.sapphire.oasis.dev"]
+                            rpcUrls: ["https://testnet.sapphire.oasis.io"],
+                            blockExplorerUrls: ["https://testnet.explorer.sapphire.oasis.io"]
                         }],
                     });
                 } catch (addError) {
