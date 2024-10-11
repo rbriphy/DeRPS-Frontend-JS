@@ -1,6 +1,7 @@
 import { CONTRACT_ADDRESS, EXPECTED_CHAIN_ID, EXPECTED_NETWORK_NAME } from './config.js';
 import { contractABI } from './abi.js';
-import * as sapphire from '../node_modules/@oasisprotocol/sapphire-paratime';
+import { wrapEthereumProvider } from '@oasisprotocol/sapphire-paratime';
+import { ethers } from 'ethers';
 
 let signer;
 let contract;
@@ -48,13 +49,16 @@ export async function ensureCorrectNetwork() {
     }
 }
 
+ 
 export async function connectWallet() {
     if (typeof window.ethereum !== 'undefined') {
         try {
+            // Wrap the Ethereum provider with the Sapphire wrapper
+            provider = wrapEthereumProvider(window.ethereum);
+
+            // Request accounts and set up the signer with the wrapped provider
             await window.ethereum.request({ method: 'eth_requestAccounts' });
-            signer = sapphire.wrap(
-                new ethers.providers.Web3Provider(window.ethereum).getSigner(),
-              );
+            signer = new ethers.providers.Web3Provider(provider).getSigner();
 
             contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
             
