@@ -17,6 +17,7 @@
   },
   "homepage": "https://github.com/ethers-io/ethers.js#readme",
   "dependencies": {
+    "@oasisprotocol/sapphire-paratime": "^1.3.2",
     "ethers": "^6.13.3"
   }
 }
