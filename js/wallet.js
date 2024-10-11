@@ -7,6 +7,7 @@ let signer;
 let contract;
 let provider;
 
+console.log(sapphire);
 
 
 export async function ensureCorrectNetwork() {
