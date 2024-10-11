@@ -1,10 +1,11 @@
 import { CONTRACT_ADDRESS, EXPECTED_CHAIN_ID, EXPECTED_NETWORK_NAME } from './config.js';
 import { contractABI } from './abi.js';
-import * as sapphire from './node_modules/@oasisprotocol/sapphire-paratime';
+import * as sapphire from '../node_modules/@oasisprotocol/sapphire-paratime';
 
 let signer;
 let contract;
 let provider;
+
 
 
 export async function ensureCorrectNetwork() {
