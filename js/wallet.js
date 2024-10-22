@@ -1,14 +1,9 @@
 import { CONTRACT_ADDRESS, EXPECTED_CHAIN_ID, EXPECTED_NETWORK_NAME } from './config.js';
 import { contractABI } from './abi.js';
-import { BrowserProvider } from '../node_modules/ethers';
-import * as sapphire from '../node_modules/@oasisprotocol/sapphire-paratime';
 
 let signer;
 let contract;
 let provider;
-
-console.log(sapphire);
-
 
 export async function ensureCorrectNetwork() {
     if (typeof window.ethereum === 'undefined') {
@@ -36,8 +31,8 @@ export async function ensureCorrectNetwork() {
                                 symbol: "ROSE",
                                 decimals: 18
                             },
-                            rpcUrls: ["https://testnet.sapphire.oasis.io"],
-                            blockExplorerUrls: ["https://testnet.explorer.sapphire.oasis.io"]
+                            rpcUrls: ["https://testnet.sapphire.oasis.dev"],
+                            blockExplorerUrls: ["https://testnet.explorer.sapphire.oasis.dev"]
                         }],
                     });
                 } catch (addError) {
@@ -50,16 +45,12 @@ export async function ensureCorrectNetwork() {
     }
 }
 
- 
 export async function connectWallet() {
     if (typeof window.ethereum !== 'undefined') {
         try {
-            provider = sapphire.wrapEthersProvider(window.ethereum);
-            signer = new BrowserProvider(provider).getSigner();
-
-
-            // Request accounts and set up the signer with the wrapped provider
             await window.ethereum.request({ method: 'eth_requestAccounts' });
+            provider = new ethers.providers.Web3Provider(window.ethereum);
+            signer = provider.getSigner();
 
             contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
             

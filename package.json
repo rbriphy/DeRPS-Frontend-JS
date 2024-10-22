@@ -4,8 +4,10 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "build": "webpack --mode production"
-  },
+  "start": "webpack serve --config webpack.config.js --mode development",
+  "build": "webpack --config webpack.config.js --mode production"
+}
+,
   "repository": {
     "type": "git",
     "url": "git+https://github.com/ethers-io/ethers.js.git"
@@ -21,8 +23,12 @@
     "ethers": "^6.13.3"
   },
   "devDependencies": {
+    "@babel/core": "^7.25.8",
+    "@babel/preset-env": "^7.25.8",
     "babel-loader": "^9.2.1",
+    "html-webpack-plugin": "^5.6.0",
     "webpack": "^5.95.0",
-    "webpack-cli": "^5.1.4"
+    "webpack-cli": "^5.1.4",
+    "webpack-dev-server": "^5.1.0"
   }
 }
