@@ -1,5 +1,6 @@
 import { CONTRACT_ADDRESS, EXPECTED_CHAIN_ID, EXPECTED_NETWORK_NAME } from './config.js';
 import { contractABI } from './abi.js';
+import {ethers} from "ethers";
 
 let signer;
 let contract;
