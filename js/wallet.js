@@ -1,6 +1,6 @@
 import { CONTRACT_ADDRESS, EXPECTED_CHAIN_ID, EXPECTED_NETWORK_NAME } from './config.js';
 import { contractABI } from './abi.js';
-import {ethers} from "ethers";
+import { ethers } from '../node_modules/ethers/dist/ethers.esm.js';
 
 let signer;
 let contract;
