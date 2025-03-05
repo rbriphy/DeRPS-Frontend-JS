@@ -1,13 +1,19 @@
 import { CONTRACT_ADDRESS, EXPECTED_CHAIN_ID, EXPECTED_NETWORK_NAME } from './config.js';
 import { contractABI } from './abi.js';
+import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
 
-let signer;
-let contract;
+let signer = null;
 let provider;
+let contract;
 
 export async function ensureCorrectNetwork() {
-    if (typeof window.ethereum === 'undefined') {
-        throw new Error('MetaMask is not installed');
+    if (window.ethereum == null) {
+        console.log("MetaMask not installed; using read-only defaults")
+        provider = ethers.getDefaultProvider()
+    }
+    else {
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
     }
 
     const currentChainId = await window.ethereum.request({ method: 'eth_chainId' });
@@ -18,7 +24,6 @@ export async function ensureCorrectNetwork() {
                 params: [{ chainId: EXPECTED_CHAIN_ID }],
             });
         } catch (switchError) {
-            // This error code indicates that the chain has not been added to MetaMask
             if (switchError.code === 4902) {
                 try {
                     await window.ethereum.request({
@@ -31,7 +36,7 @@ export async function ensureCorrectNetwork() {
                                 symbol: "ROSE",
                                 decimals: 18
                             },
-                            rpcUrls: ["https://testnet.sapphire.oasis.dev"],
+                            rpcUrls: ["https://testnet.sapphire.oasis.dev"], 
                             blockExplorerUrls: ["https://testnet.explorer.sapphire.oasis.dev"]
                         }],
                     });
@@ -49,15 +54,12 @@ export async function connectWallet() {
     if (typeof window.ethereum !== 'undefined') {
         try {
             await window.ethereum.request({ method: 'eth_requestAccounts' });
-            provider = new ethers.providers.Web3Provider(window.ethereum);
-            signer = provider.getSigner();
-
+            provider = new ethers.BrowserProvider(window.ethereum);
+            signer = await provider.getSigner();
             contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
             
-            // Set up listeners
             window.ethereum.on('accountsChanged', handleAccountsChanged);
             window.ethereum.on('chainChanged', handleChainChanged);
-
             updateUIState('connected');
             return { contract, signer, provider };
         } catch (error) {
@@ -106,19 +108,18 @@ function handleConnectionError(error) {
     updateUIState('disconnected');
 }
 
-function handleAccountsChanged(accounts) {
+async function handleAccountsChanged(accounts) {
     if (accounts.length === 0) {
         updateUIState('disconnected');
     } else {
-        // Re-initialize the contract with the new account
-        signer = provider.getSigner();
+        provider = new ethers.BrowserProvider(window.ethereum);
+        signer = await provider.getSigner();
         contract = new ethers.Contract(CONTRACT_ADDRESS, contractABI, signer);
         updateUIState('connected');
     }
 }
 
 function handleChainChanged(_chainId) {
-    // We recommend reloading the page, unless you must do otherwise
     window.location.reload();
 }
 

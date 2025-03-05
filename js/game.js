@@ -1,8 +1,16 @@
 import { MAX_BET, GAS_LIMIT } from './config.js';
+import { getSigner } from './wallet.js';
+import { ethers } from "https://cdnjs.cloudflare.com/ajax/libs/ethers/6.7.0/ethers.min.js";
 
 export async function playGame(move, contract) {
     if (!contract) {
         alert("Please connect to MetaMask first");
+        return;
+    }
+
+    const signer = getSigner();  // Get signer using the imported function
+    if (!signer) {
+        alert("Contract is not initialized with a signer.");
         return;
     }
     
@@ -16,7 +24,7 @@ export async function playGame(move, contract) {
         document.getElementById('game-result').innerHTML = "Transaction in progress...";
 
         const tx = await contract.playGame(move, {
-            value: ethers.utils.parseEther(betAmount),
+            value: ethers.parseEther(betAmount), // Updated for ethers v6
             gasLimit: GAS_LIMIT
         });
 
@@ -33,7 +41,10 @@ export async function playGame(move, contract) {
         for (const log of receipt.logs) {
             console.log("Checking log:", log);
             try {
-                const parsedLog = contract.interface.parseLog(log);
+                const parsedLog = contract.interface.parseLog({
+                    topics: log.topics,
+                    data: log.data
+                });
                 console.log("Parsed log:", parsedLog);
                 if (parsedLog.name === 'GamePlayed') {
                     gameResultFound = true;
@@ -44,8 +55,8 @@ export async function playGame(move, contract) {
                         Player Move: ${moves[playerMove]}<br>
                         Opponent Move: ${moves[opponentMove]}<br>
                         Outcome: ${outcomes[outcome]}<br>
-                        Bet: ${ethers.utils.formatEther(bet)} ROSE<br>
-                        Winnings: ${ethers.utils.formatEther(winnings)} ROSE
+                        Bet: ${ethers.formatEther(bet)} ROSE<br>
+                        Winnings: ${ethers.formatEther(winnings)} ROSE
                     `;
                     break;
                 }
