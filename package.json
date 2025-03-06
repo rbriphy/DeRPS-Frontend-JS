@@ -5,7 +5,8 @@
   "main": "src/index.js",
   "scripts": {
     "start": "webpack serve --mode development",
-    "build": "webpack --mode production"
+    "build": "webpack --mode production",
+    "deploy": "gh-pages -d dist"
   },
   "dependencies": {
     "@oasisprotocol/sapphire-ethers-v6": "^6.0.1",
@@ -17,6 +18,7 @@
     "assert": "^2.1.0",
     "babel-loader": "^9.2.1",
     "crypto-browserify": "^3.12.1",
+    "gh-pages": "^6.3.0",
     "https-browserify": "^1.0.0",
     "os-browserify": "^0.3.0",
     "stream-browserify": "^3.0.0",
